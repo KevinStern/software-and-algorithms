@@ -32,6 +32,15 @@ import org.junit.Test;
 public class DamerauLevenshteinAlgorithmTest {
 	@Test
 	public void test() {
+		Assert.assertEquals(7, new DamerauLevenshteinAlgorithm(1, 1, 1, 1)
+				.execute("NawKtYu", ""));
+
+		Assert.assertEquals(7, new DamerauLevenshteinAlgorithm(1, 1, 1, 1)
+				.execute("", "NawKtYu"));
+
+		Assert.assertEquals(0, new DamerauLevenshteinAlgorithm(1, 1, 1, 1)
+				.execute("NawKtYu", "NawKtYu"));
+
 		Assert.assertEquals(6, new DamerauLevenshteinAlgorithm(1, 1, 1, 1)
 				.execute("NawKtYu", "tKNwYua"));
 

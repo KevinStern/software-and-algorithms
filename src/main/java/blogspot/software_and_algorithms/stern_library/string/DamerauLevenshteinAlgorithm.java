@@ -91,6 +91,12 @@ public class DamerauLevenshteinAlgorithm {
 	 * string and the specified target string.
 	 */
 	public int execute(String source, String target) {
+		if (source.length() == 0) {
+			return target.length() * insertCost;
+		}
+		if (target.length() == 0) {
+			return source.length() * deleteCost;
+		}
 		int[][] table = new int[source.length()][target.length()];
 		Map<Character, Integer> sourceIndexByCharacter = new HashMap<Character, Integer>();
 		if (source.charAt(0) != target.charAt(0)) {
