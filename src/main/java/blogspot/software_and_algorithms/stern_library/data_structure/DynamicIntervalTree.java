@@ -33,7 +33,7 @@ import blogspot.software_and_algorithms.stern_library.data_structure.RedBlackTre
  * stores intervals so that both point queries (queries that return intervals
  * from the set which contain a query point) and overlapping interval queries
  * (queries that return intervals from the set which overlap a query interval)
- * can be completed in time O(k*log(n)), where n is the number of intervals
+ * can be completed in time O(log(n) + k), where n is the number of intervals
  * stored in the tree and k is the size of the result set from the query.
  * <p>
  * Insertion and deletion of intervals to and from this tree completes in time
@@ -178,15 +178,39 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			throw new NullPointerException("queryPoint is null");
 		}
 		List<T> result = new ArrayList<T>();
-		T interval;
-		while ((interval = fetchContainingInterval(queryPoint)) != null) {
-			result.add(interval);
-			delete(interval);
-		}
-		for (T next : result) {
-			insert(next);
-		}
+		fetchContainingIntervals(queryPoint, 
+				(Node<U, T>) binarySearchTree.getRoot(), result);
+
 		return result;
+	}
+
+	/**
+	 * Retrieving all intervals containing queryPoint in recursive way
+	 */
+	private void fetchContainingIntervals(U queryPoint, Node<U, T> root,
+			List<T> result) {
+		if(root == null)
+			return;
+		
+		// If queryPoint is to the right of the rightmost point of any interval
+	    // in this node and all children, there won't be any matches.
+		if(queryPoint.compareTo(root.getMaximumHighEndpoint()) > 0)
+			return;
+		
+		// Search left children
+		fetchContainingIntervals(queryPoint, root.getLeft(), result);
+
+		// Check this node
+		if (root.getValue().contains(queryPoint))
+			result.add(root.getValue());
+
+		// If queryPoint is to the left of the start of this interval,
+		// then it can't be in any child to the right.
+		if (queryPoint.compareTo(root.getValue().getLow()) < 0)
+			return;
+
+		// Otherwise, search right children
+		fetchContainingIntervals(queryPoint, root.getRight(), result);
 	}
 
 	/**
@@ -228,15 +252,39 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			throw new NullPointerException("queryInterval is null");
 		}
 		List<T> result = new ArrayList<T>();
-		T interval;
-		while ((interval = fetchOverlappingInterval(queryInterval)) != null) {
-			result.add(interval);
-			delete(interval);
-		}
-		for (T next : result) {
-			insert(next);
-		}
+		fetchOverlappingIntervals(queryInterval, 
+				(Node<U, T>) binarySearchTree.getRoot(), result);
+		
 		return result;
+	}
+	
+	/**
+	 * Retrieve all overlapping intervals in recursive way
+	 */
+	private void fetchOverlappingIntervals(T queryInterval, 
+			Node<U, T> root, List<T> result){
+		if(root == null)
+			return;
+		
+		// If queryInterval is to the right of the rightmost point of any interval
+	    // in this node and all children, there won't be any matches.
+		if(queryInterval.getLow().compareTo(root.getMaximumHighEndpoint()) > 0)
+			return;
+		
+		// Search left children
+		fetchOverlappingIntervals(queryInterval, root.getLeft(), result);
+
+		// Check this node
+		if (root.getValue().overlaps(queryInterval))
+			result.add(root.getValue());
+
+		// If queryInterval is to the left of the start of this interval,
+		// then it can't be in any child to the right.
+		if (queryInterval.getHigh().compareTo(root.getValue().getLow()) < 0)
+			return;
+
+		// Otherwise, search right children
+		fetchOverlappingIntervals(queryInterval, root.getRight(), result);
 	}
 
 	/**
@@ -345,3 +393,4 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 		}
 	}
 }
+
