@@ -75,7 +75,7 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 				DynamicIntervalTree.Node<U, T> temp = (DynamicIntervalTree.Node<U, T>) node
 						.getParent();
 				while (temp != null) {
-					temp.computeMaximumHighEndpoint();
+					temp.computeSubtreeSpan();
 					temp = temp.getParent();
 				}
 			}
@@ -87,7 +87,7 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			DynamicIntervalTree.Node<U, T> temp = (DynamicIntervalTree.Node<U, T>) node
 					.getParent();
 			while (temp != null) {
-				temp.computeMaximumHighEndpoint();
+				temp.computeSubtreeSpan();
 				temp = temp.getParent();
 			}
 			super.fixAfterDeletion(node);
@@ -98,7 +98,7 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			DynamicIntervalTree.Node<U, T> temp = (DynamicIntervalTree.Node<U, T>) node
 					.getParent();
 			while (temp != null) {
-				temp.computeMaximumHighEndpoint();
+				temp.computeSubtreeSpan();
 				temp = temp.getParent();
 			}
 			super.fixAfterInsertion(node);
@@ -108,16 +108,16 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 		protected void leftRotate(RedBlackTree.Node<T> node) {
 			super.leftRotate(node);
 			DynamicIntervalTree.Node<U, T> temp = (DynamicIntervalTree.Node<U, T>) node;
-			temp.computeMaximumHighEndpoint();
-			temp.getParent().computeMaximumHighEndpoint();
+			temp.computeSubtreeSpan();
+			temp.getParent().computeSubtreeSpan();
 		}
 
 		@Override
 		protected void rightRotate(RedBlackTree.Node<T> node) {
 			super.rightRotate(node);
 			DynamicIntervalTree.Node<U, T> temp = (DynamicIntervalTree.Node<U, T>) node;
-			temp.computeMaximumHighEndpoint();
-			temp.getParent().computeMaximumHighEndpoint();
+			temp.computeSubtreeSpan();
+			temp.getParent().computeSubtreeSpan();
 		}
 	};
 
@@ -156,9 +156,8 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			Node<U, T> leftChild = node.getLeft();
 			node = node.getRight();
 			if (leftChild != null) {
-				int cmp = leftChild.getMaximumHighEndpoint().compareTo(
-						queryPoint);
-				if (cmp > 0 || cmp == 0 && leftChild.isClosedOnEndpoint()) {
+				int cmp = leftChild.getSubtreeSpanHigh().compareTo(queryPoint);
+				if (cmp > 0 || cmp == 0 && leftChild.isClosedOnSubtreeSpanHigh()) {
 					node = leftChild;
 				}
 			}
@@ -178,13 +177,30 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			throw new NullPointerException("queryPoint is null");
 		}
 		List<T> result = new ArrayList<T>();
-		T interval;
-		while ((interval = fetchContainingInterval(queryPoint)) != null) {
-			result.add(interval);
-			delete(interval);
+		Node<U, T> node = (Node<U, T>) binarySearchTree.getRoot();
+		List<Node<U, T>> queue = new ArrayList<Node<U, T>>();
+		if (node != null) {
+			queue.add(node);
 		}
-		for (T next : result) {
-			insert(next);
+		while (!queue.isEmpty()) {
+			node = queue.remove(queue.size() - 1);
+			if (node.getValue().contains(queryPoint)) {
+				result.add(node.getValue());
+			}
+			Node<U, T> child = node.getLeft();
+			if (child != null) {
+				int cmp = child.getSubtreeSpanHigh().compareTo(queryPoint);
+				if (cmp > 0 || cmp == 0 && child.isClosedOnSubtreeSpanHigh()) {
+					queue.add(child);
+				}
+			}
+			child = node.getRight();
+			if (child != null) {
+				int cmp = child.getSubtreeSpanLow().compareTo(queryPoint);
+				if (cmp < 0 || cmp == 0 && child.isClosedOnSubtreeSpanLow()) {
+					queue.add(child);
+				}
+			}
 		}
 		return result;
 	}
@@ -205,9 +221,9 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			Node<U, T> leftChild = node.getLeft();
 			node = node.getRight();
 			if (leftChild != null) {
-				int cmp = leftChild.getMaximumHighEndpoint().compareTo(
+				int cmp = leftChild.getSubtreeSpanHigh().compareTo(
 						queryInterval.getLow());
-				if (cmp > 0 || cmp == 0 && leftChild.isClosedOnEndpoint()
+				if (cmp > 0 || cmp == 0 && leftChild.isClosedOnSubtreeSpanHigh()
 						&& queryInterval.isClosedOnLow()) {
 					node = leftChild;
 				}
@@ -228,13 +244,32 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			throw new NullPointerException("queryInterval is null");
 		}
 		List<T> result = new ArrayList<T>();
-		T interval;
-		while ((interval = fetchOverlappingInterval(queryInterval)) != null) {
-			result.add(interval);
-			delete(interval);
+		Node<U, T> node = (Node<U, T>) binarySearchTree.getRoot();
+		List<Node<U, T>> queue = new ArrayList<Node<U, T>>();
+		if (node != null) {
+			queue.add(node);
 		}
-		for (T next : result) {
-			insert(next);
+		while (!queue.isEmpty()) {
+			node = queue.remove(queue.size() - 1);
+			if (node.getValue().overlaps(queryInterval)) {
+				result.add(node.getValue());
+			}
+			Node<U, T> child = node.getLeft();
+			if (child != null) {
+				int cmp = child.getSubtreeSpanHigh().compareTo(queryInterval.getLow());
+				if (cmp > 0 || cmp == 0 && child.isClosedOnSubtreeSpanHigh()
+						&& queryInterval.isClosedOnLow()) {
+					queue.add(child);
+				}
+			}
+			child = node.getRight();
+			if (child != null) {
+				int cmp = child.getSubtreeSpanLow().compareTo(queryInterval.getHigh());
+				if (cmp < 0 || cmp == 0 && child.isClosedOnSubtreeSpanLow()
+						&& queryInterval.isClosedOnHigh()) {
+					queue.add(child);
+				}
+			}
 		}
 		return result;
 	}
@@ -262,13 +297,13 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 
 	/**
 	 * A <em>node</em> for a dynamic interval tree is a red-black tree node
-	 * augmented to store the maximum high endpoint among intervals stored
-	 * within the subtree rooted at the node.
+	 * augmented to store the maximum high and minimum low endpoints among
+	 * intervals stored within the subtree rooted at the node.
 	 */
 	protected static class Node<U extends Comparable<U>, T extends Interval<U>>
 			extends RedBlackTree.Node<T> {
-		private U maximumHighEndpoint;
-		private boolean isClosedOnEndpoint;
+		private U subtreeSpanLow, subtreeSpanHigh;
+		private boolean isClosedOnSubtreeSpanLow, isClosedOnSubtreeSpanHigh;
 
 		/**
 		 * Construct a new node associated with the specified interval.
@@ -278,38 +313,52 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 		 */
 		public Node(T interval) {
 			super(interval);
-			maximumHighEndpoint = interval.getHigh();
-			isClosedOnEndpoint = interval.isClosedOnHigh();
+			subtreeSpanLow = interval.getLow();
+			subtreeSpanHigh = interval.getHigh();
+			isClosedOnSubtreeSpanLow = interval.isClosedOnLow();
+			isClosedOnSubtreeSpanHigh = interval.isClosedOnHigh();
 		}
 
 		/**
-		 * Compute the maximum high endpoint among intervals stored within the
-		 * subtree rooted at this node and correct values up the tree.
+		 * Compute the maximum high and minimum low endpoints among intervals stored
+		 * within the subtree rooted at this node and correct values up the tree.
 		 */
-		protected void computeMaximumHighEndpoint() {
-			U maximumHighEndpoint = getValue().getHigh();
-			boolean isClosedOnEndpoint = getValue().isClosedOnHigh();
+		protected void computeSubtreeSpan() {
+			U subtreeSpanLow = getValue().getLow();
+			U subtreeSpanHigh = getValue().getHigh();
+			boolean isClosedOnSubtreeSpanLow = getValue().isClosedOnLow();
+			boolean isClosedOnSubtreeSpanHigh = getValue().isClosedOnHigh();
 			Node<U, T> child;
 			child = getLeft();
 			if (child != null) {
-				int cmp = child.maximumHighEndpoint
-						.compareTo(maximumHighEndpoint);
-				if (cmp > 0 || cmp == 0 && child.isClosedOnEndpoint) {
-					maximumHighEndpoint = child.maximumHighEndpoint;
-					isClosedOnEndpoint = child.isClosedOnEndpoint;
+				int cmp = child.subtreeSpanLow.compareTo(subtreeSpanLow);
+				if (cmp < 0 || cmp == 0 && child.isClosedOnSubtreeSpanLow) {
+					subtreeSpanLow = child.subtreeSpanLow;
+					isClosedOnSubtreeSpanLow = child.isClosedOnSubtreeSpanLow;
+				}
+				cmp = child.subtreeSpanHigh.compareTo(subtreeSpanHigh);
+				if (cmp > 0 || cmp == 0 && child.isClosedOnSubtreeSpanHigh) {
+					subtreeSpanHigh = child.subtreeSpanHigh;
+					isClosedOnSubtreeSpanHigh = child.isClosedOnSubtreeSpanHigh;
 				}
 			}
 			child = getRight();
 			if (child != null) {
-				int cmp = child.maximumHighEndpoint
-						.compareTo(maximumHighEndpoint);
-				if (cmp > 0 || cmp == 0 && child.isClosedOnEndpoint) {
-					maximumHighEndpoint = child.maximumHighEndpoint;
-					isClosedOnEndpoint = child.isClosedOnEndpoint;
+				int cmp = child.subtreeSpanLow.compareTo(subtreeSpanLow);
+				if (cmp < 0 || cmp == 0 && child.isClosedOnSubtreeSpanLow) {
+					subtreeSpanLow = child.subtreeSpanLow;
+					isClosedOnSubtreeSpanLow = child.isClosedOnSubtreeSpanLow;
+				}
+				cmp = child.subtreeSpanHigh.compareTo(subtreeSpanHigh);
+				if (cmp > 0 || cmp == 0 && child.isClosedOnSubtreeSpanHigh) {
+					subtreeSpanHigh = child.subtreeSpanHigh;
+					isClosedOnSubtreeSpanHigh = child.isClosedOnSubtreeSpanHigh;
 				}
 			}
-			this.maximumHighEndpoint = maximumHighEndpoint;
-			this.isClosedOnEndpoint = isClosedOnEndpoint;
+			this.subtreeSpanLow = subtreeSpanLow;
+			this.isClosedOnSubtreeSpanLow = isClosedOnSubtreeSpanLow;
+			this.subtreeSpanHigh = subtreeSpanHigh;
+			this.isClosedOnSubtreeSpanHigh = isClosedOnSubtreeSpanHigh;
 		}
 
 		/**
@@ -318,10 +367,6 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 		@Override
 		public Node<U, T> getLeft() {
 			return (Node<U, T>) super.getLeft();
-		}
-
-		public U getMaximumHighEndpoint() {
-			return maximumHighEndpoint;
 		}
 
 		/**
@@ -340,8 +385,20 @@ public class DynamicIntervalTree<U extends Comparable<U>, T extends Interval<U>>
 			return (Node<U, T>) super.getRight();
 		}
 
-		public boolean isClosedOnEndpoint() {
-			return isClosedOnEndpoint;
+		public U getSubtreeSpanHigh() {
+			return subtreeSpanHigh;
+		}
+
+		public U getSubtreeSpanLow() {
+			return subtreeSpanLow;
+		}
+
+		public boolean isClosedOnSubtreeSpanHigh() {
+			return isClosedOnSubtreeSpanHigh;
+		}
+
+		public boolean isClosedOnSubtreeSpanLow() {
+			return isClosedOnSubtreeSpanLow;
 		}
 	}
 }
