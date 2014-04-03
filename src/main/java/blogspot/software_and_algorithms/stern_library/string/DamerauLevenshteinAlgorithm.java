@@ -112,8 +112,8 @@ public class DamerauLevenshteinAlgorithm {
 					matchDistance);
 		}
 		for (int j = 1; j < target.length(); j++) {
-			int deleteDistance = table[0][j - 1] + insertCost;
-			int insertDistance = (j + 1) * insertCost + deleteCost;
+			int deleteDistance = (j + 1) * insertCost + deleteCost;
+			int insertDistance = table[0][j - 1] + insertCost;
 			int matchDistance = j * insertCost
 					+ (source.charAt(0) == target.charAt(j) ? 0 : replaceCost);
 			table[0][j] = Math.min(Math.min(deleteDistance, insertDistance),
