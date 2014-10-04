@@ -4,7 +4,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,18 +30,40 @@ import java.util.Set;
  */
 
 /**
- * An implementation of the divide-and-conquer algorithm for computing the
- * closest pair among elements of a set of points. The algorithm consists of
- * constructing a list of points, then recursively dividing the list into a left
- * and right sublist and inspecting each sublist individually for closest point
- * pairs. The two sub-results are merged by searching for closer point pairs
- * that cross the boundary of separation. Happily, only a linear amount of work
- * is required to merge the two results into a final closest pair of points,
- * giving a total runtime of O(n*log(n)) for the algorithm.
+ * An implementation of a divide-and-conquer algorithm for computing the closest
+ * pair of elements of a set of points. The algorithm consists of constructing
+ * an ordered list of points, then recursively dividing the list into a left and
+ * right sublist towards finding the closest point pairs for each sublist. The
+ * two sub-results are merged by selecting the optimal among them and all closer
+ * point pairs that cross the boundary of separation. Happily, only a linear
+ * amount of work is required to find all closer point pairs that cross the
+ * boundary, giving a total runtime of O(n*log(n)) for the algorithm.
  * 
  * @author Kevin L. Stern
  */
 public class ClosestPointPairAlgorithm {
+  /**
+   * Find the closest pair of points among p1, p2 and p3.
+   */
+  private static PairStructure closestPair(Point2D p1, Point2D p2, Point2D p3) {
+    double d1 = p1.distanceSq(p2);
+    double d2 = p2.distanceSq(p3);
+    double d3 = p1.distanceSq(p3);
+    if (d1 < d2) {
+      if (d1 < d3) {
+        return new PairStructure(p1, p2, d1);
+      } else {
+        return new PairStructure(p1, p3, d3);
+      }
+    } else {
+      if (d2 < d3) {
+        return new PairStructure(p2, p3, d2);
+      } else {
+        return new PairStructure(p1, p3, d3);
+      }
+    }
+  }
+
   private List<Point2D> pointsOrderedByXCoordinate, pointsOrderedByYCoordinate;
 
   /**
@@ -60,26 +81,20 @@ public class ClosestPointPairAlgorithm {
       throw new IllegalArgumentException("points is too small");
     }
     pointsOrderedByXCoordinate = new ArrayList<Point2D>(points);
-    Collections.sort(pointsOrderedByXCoordinate, new Comparator<Point2D>() {
-      @Override
-      public int compare(Point2D o1, Point2D o2) {
-        double delta = o1.getX() - o2.getX();
-        if (delta == 0.0) {
-          delta = o1.getY() - o2.getY();
-        }
-        return delta < 0 ? -1 : delta > 0 ? 1 : 0;
+    Collections.sort(pointsOrderedByXCoordinate, (o1, o2) -> {
+      double delta = o1.getX() - o2.getX();
+      if (delta == 0.0) {
+        delta = o1.getY() - o2.getY();
       }
+      return delta < 0 ? -1 : delta > 0 ? 1 : 0;
     });
     pointsOrderedByYCoordinate = new ArrayList<Point2D>(points);
-    Collections.sort(pointsOrderedByYCoordinate, new Comparator<Point2D>() {
-      @Override
-      public int compare(Point2D o1, Point2D o2) {
-        double delta = o1.getY() - o2.getY();
-        if (delta == 0.0) {
-          delta = o1.getX() - o2.getX();
-        }
-        return delta < 0 ? -1 : delta > 0 ? 1 : 0;
+    Collections.sort(pointsOrderedByYCoordinate, (o1, o2) -> {
+      double delta = o1.getY() - o2.getY();
+      if (delta == 0.0) {
+        delta = o1.getX() - o2.getX();
       }
+      return delta < 0 ? -1 : delta > 0 ? 1 : 0;
     });
   }
 
@@ -87,49 +102,31 @@ public class ClosestPointPairAlgorithm {
    * Internal helper method which implements the closest point pair algorithm.
    * 
    * @param low
-   *          the index, inclusive, delimiting the low boundary of the portion
-   *          of the list in which to search for the closest point pair.
+   *          the starting index, inclusive, of the sublist in which to search
+   *          for the closest point pair.
    * @param high
-   *          the index, exclusive, delimiting the high boundary of the portion
-   *          of the list in which to search for the closest point pair.
-   * @param localPointsSortedByYCoordinate
-   *          the points from the portion of the list delimited by the low and
-   *          high parameters, sorted by y coordinate.
+   *          the ending index, exclusive, of the sublist in which to search for
+   *          the closest point pair.
+   * @param localPointsOrderedByYCoordinate
+   *          the points from the target sublist, ordered by y coordinate.
    * @return a PairStructure containing the closest point pair among elements of
-   *         the specified portion of the list.
+   *         the target sublist.
    */
-  protected PairStructure closestPair(int low,
-                                      int high,
-                                      List<Point2D> localPointsSortedByYCoordinate) {
+  protected PairStructure closestPair(int low, int high,
+      List<Point2D> localPointsOrderedByYCoordinate) {
     int size = high - low;
     if (size == 3) {
-      Point2D p1 = pointsOrderedByXCoordinate.get(low);
-      Point2D p2 = pointsOrderedByXCoordinate.get(low + 1);
-      Point2D p3 = pointsOrderedByXCoordinate.get(low + 2);
-      double d1 = p1.distanceSq(p2);
-      double d2 = p2.distanceSq(p3);
-      double d3 = p1.distanceSq(p3);
-      if (d1 < d2) {
-        if (d1 < d3) {
-          return new PairStructure(p1, p2, d1);
-        } else {
-          return new PairStructure(p1, p3, d3);
-        }
-      } else {
-        if (d2 < d3) {
-          return new PairStructure(p2, p3, d2);
-        } else {
-          return new PairStructure(p1, p3, d3);
-        }
-      }
+      return closestPair(
+          pointsOrderedByXCoordinate.get(low),
+          pointsOrderedByXCoordinate.get(low + 1),
+          pointsOrderedByXCoordinate.get(low + 2));
     } else if (size == 2) {
       Point2D p1 = pointsOrderedByXCoordinate.get(low);
       Point2D p2 = pointsOrderedByXCoordinate.get(low + 1);
       return new PairStructure(p1, p2, p1.distanceSq(p2));
     }
-    assert size > 3;
 
-    int mid = (low + high) >>> 1;
+    int mid = (low >> 1) + (high >> 1) /* low / 2 + high / 2 */;
     Set<Point2D> leftSubtreeMemberSet = new HashSet<Point2D>(mid - low);
     for (int j = low; j < mid; j++) {
       leftSubtreeMemberSet.add(pointsOrderedByXCoordinate.get(j));
@@ -144,7 +141,7 @@ public class ClosestPointPairAlgorithm {
         - low);
     List<Point2D> rightPointsOrderedByYCoordinate = new ArrayList<Point2D>(high
         - mid);
-    for (Point2D next : localPointsSortedByYCoordinate) {
+    for (Point2D next : localPointsOrderedByYCoordinate) {
       if (leftSubtreeMemberSet.contains(next)) {
         leftPointsOrderedByYCoordinate.add(next);
       } else {
@@ -152,40 +149,47 @@ public class ClosestPointPairAlgorithm {
       }
     }
 
-    PairStructure leftSubtreeResult = closestPair(low, mid,
-                                                  leftPointsOrderedByYCoordinate);
-    PairStructure rightSubtreeResult = closestPair(mid, high,
-                                                   rightPointsOrderedByYCoordinate);
-    PairStructure result = leftSubtreeResult.distanceSq < rightSubtreeResult.distanceSq ? leftSubtreeResult
+    PairStructure leftSubtreeResult = closestPair(
+        low,
+        mid,
+        leftPointsOrderedByYCoordinate);
+    PairStructure rightSubtreeResult = closestPair(
+        mid,
+        high,
+        rightPointsOrderedByYCoordinate);
+    PairStructure result = leftSubtreeResult.distanceSq < rightSubtreeResult.distanceSq
+        ? leftSubtreeResult
         : rightSubtreeResult;
 
     List<Point2D> boundaryPointsOrderedByYCoordinate = new ArrayList<Point2D>();
     double midXCoordinate = pointsOrderedByXCoordinate.get(mid).getX();
-    for (Point2D next : localPointsSortedByYCoordinate) {
+    for (Point2D next : localPointsOrderedByYCoordinate) {
       double v = next.getX() - midXCoordinate;
       if (v * v < result.distanceSq) {
         boundaryPointsOrderedByYCoordinate.add(next);
       }
     }
-    for (int i = 0; i < boundaryPointsOrderedByYCoordinate.size(); i++) {
-      Point2D next = boundaryPointsOrderedByYCoordinate.get(i);
+    for (int i = 0; i < boundaryPointsOrderedByYCoordinate.size(); ++i) {
+      Point2D currentPoint = boundaryPointsOrderedByYCoordinate.get(i);
       int index;
       for (int j = 1; (index = i + j) < boundaryPointsOrderedByYCoordinate
-          .size(); j += 1) {
-        Point2D candidatePartner = boundaryPointsOrderedByYCoordinate
-            .get(index);
+          .size(); ++j) {
+        Point2D testPoint = boundaryPointsOrderedByYCoordinate.get(index);
         /*
-         * Only a constant number of points will be so that their y coordinate
-         * is within the minimum of the result distances for the left/right
-         * subtrees.
+         * The number of points that can be situated within the boundary so that
+         * their y coordinate is within the minimum of the result distances for
+         * the left and right subtrees from currentPoint.getY() is bounded by a
+         * constant, since that distance value spatially limits the number of
+         * points that can be packed near one another on each side of the
+         * boundary.
          */
-        double v = candidatePartner.getY() - next.getY();
+        double v = testPoint.getY() - currentPoint.getY();
         if (v * v >= result.distanceSq) {
           break;
         }
-        double candidateDistance = next.distanceSq(candidatePartner);
-        if (candidateDistance < result.distanceSq) {
-          result = new PairStructure(next, candidatePartner, candidateDistance);
+        double testDistance = currentPoint.distanceSq(testPoint);
+        if (testDistance < result.distanceSq) {
+          result = new PairStructure(currentPoint, testPoint, testDistance);
         }
       }
     }
@@ -201,14 +205,16 @@ public class ClosestPointPairAlgorithm {
    *         instance.
    */
   public Point2D[] execute() {
-    PairStructure result = closestPair(0, pointsOrderedByXCoordinate.size(),
-                                       pointsOrderedByYCoordinate);
+    PairStructure result = closestPair(
+        0,
+        pointsOrderedByXCoordinate.size(),
+        pointsOrderedByYCoordinate);
     return new Point2D[] { result.p1, result.p2 };
   }
 
   /**
-   * Convenience data structure to hold a pair of points along with distance
-   * information.
+   * Convenience data structure to hold a pair of points along with their
+   * distance from one another.
    */
   protected static class PairStructure {
     private Point2D p1, p2;
@@ -217,16 +223,16 @@ public class ClosestPointPairAlgorithm {
     /**
      * Constructor.
      * 
-     * @param point1
+     * @param p1
      *          the first point.
-     * @param point2
+     * @param p2
      *          the second point.
      * @param distanceSq
-     *          the distance between the two points, squared.
+     *          the distance between p1 and p2, squared.
      */
-    public PairStructure(Point2D point1, Point2D point2, double distanceSq) {
-      this.p1 = point1;
-      this.p2 = point2;
+    public PairStructure(Point2D p1, Point2D p2, double distanceSq) {
+      this.p1 = p1;
+      this.p2 = p2;
       this.distanceSq = distanceSq;
     }
   }
