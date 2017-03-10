@@ -36,9 +36,9 @@ import blogspot.software_and_algorithms.stern_library.data_structure.RedBlackTre
  * This implementation is based upon Cormen, Leiserson, Rivest, Stein's
  * Introduction to Algorithms book.
  * 
- * @see Introduction to Algorithms Cormen, Leiserson, Rivest, and Stein.
- *      Introduction to Algorithms. 2nd ed. Cambridge, MA: MIT Press, 2001.
- *      ISBN: 0262032937.
+ * See Introduction to Algorithms Cormen, Leiserson, Rivest, and Stein.
+ *     Introduction to Algorithms. 2nd ed. Cambridge, MA: MIT Press, 2001.
+ *     ISBN: 0262032937.
  */
 public class RedBlackTree<T> implements Iterable<T> {
   private Comparator<? super T> comparator;
@@ -162,7 +162,7 @@ public class RedBlackTree<T> implements Iterable<T> {
   }
 
   /**
-   * Called by {@link #delete(Node)} when the node to be removed is a leaf. In
+   * Called by {@link #delete(Object)} when the node to be removed is a leaf. In
    * this case, the node's value is exchanged with its successor as per the
    * typical binary tree node removal operation. This method allows a subclass
    * to influence value exchange behavior (e.g. if additional node information
@@ -184,8 +184,6 @@ public class RedBlackTree<T> implements Iterable<T> {
    * 
    * @param node
    *          the deleted node or the swap node.
-   * 
-   * @see CLRS Introduction to Algorithms
    */
   protected void fixAfterDeletion(Node<T> node) {
     while (node != root && getColor(node) == NodeColor.BLACK) {
@@ -251,8 +249,6 @@ public class RedBlackTree<T> implements Iterable<T> {
    * 
    * @param node
    *          the inserted node.
-   * 
-   * @see CLRS Introduction to Algorithms
    */
   protected void fixAfterInsertion(Node<T> node) {
     while (getColor(node.getParent()) == NodeColor.RED) {
@@ -352,8 +348,6 @@ public class RedBlackTree<T> implements Iterable<T> {
    * Get the predecessor of the specified node. The predecessor of a node n is
    * the node with the largest value in the tree smaller than the value held by
    * n.
-   * 
-   * @see CLRS
    */
   public Node<T> getPredecessor(Node<T> node) {
     if (node.getLeft() != null) {
@@ -391,8 +385,6 @@ public class RedBlackTree<T> implements Iterable<T> {
   /**
    * Get the successor of the specified node. The successor of a node n is the
    * node with the smallest value in the tree larger than the value held by n.
-   * 
-   * @see CLRS
    */
   public Node<T> getSuccessor(Node<T> node) {
     if (node.getRight() != null) {
@@ -507,8 +499,6 @@ public class RedBlackTree<T> implements Iterable<T> {
    * 
    * @param node
    *          the node on which the left rotate operation will be performed.
-   * 
-   * @see CLRS Introduction to Algorithms
    */
   protected void leftRotate(Node<T> node) {
     Node<T> temp = node.getRight();
@@ -531,8 +521,6 @@ public class RedBlackTree<T> implements Iterable<T> {
    * 
    * @param node
    *          the node on which a right rotate operation is to be performed.
-   * 
-   * @see CLRS Introduction to Algorithms
    */
   protected void rightRotate(Node<T> node) {
     Node<T> temp = node.getLeft();

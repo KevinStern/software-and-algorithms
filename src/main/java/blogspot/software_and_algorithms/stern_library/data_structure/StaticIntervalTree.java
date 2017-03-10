@@ -273,7 +273,7 @@ public class StaticIntervalTree<U extends Comparable<U>, T extends Interval<U>> 
   /**
    * Insert the specified interval into this tree. Behavior is undefined when
    * the interval was not included in the set of intervals presented at the most
-   * recent call to {@link #buildTree(Collection)}.
+   * recent call to {@link #buildTree(Set)}.
    * 
    * @param interval
    *          the interval to insert.
@@ -500,7 +500,7 @@ public class StaticIntervalTree<U extends Comparable<U>, T extends Interval<U>> 
     /**
      * Fetch all intervals from this node which overlap the specified interval.
      * By contract, the interval must be such that {@link Interval#getLow()}
-     * <code><=</code> {@link Node#getPoint()} <code><=</code>
+     * <code>&le;</code> {@link Node#getPoint()} <code>&le;</code>
      * {@link Interval#getHigh()}.
      * 
      * @param target
