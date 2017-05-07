@@ -63,7 +63,8 @@ public class HungarianAlgorithm {
    * @param costMatrix
    *          the cost matrix, where matrix[i][j] holds the cost of assigning
    *          worker i to job j, for all i, j. The cost matrix must not be
-   *          irregular in the sense that all rows must be the same length.
+   *          irregular in the sense that all rows must be the same length; in
+   *          addition, all entries must be non-infinite numbers.
    */
   public HungarianAlgorithm(double[][] costMatrix) {
     this.dim = Math.max(costMatrix.length, costMatrix[0].length);
@@ -74,6 +75,14 @@ public class HungarianAlgorithm {
       if (w < costMatrix.length) {
         if (costMatrix[w].length != this.cols) {
           throw new IllegalArgumentException("Irregular cost matrix");
+        }
+        for (int j = 0; j < this.cols; j++) {
+          if (Double.isInfinite(costMatrix[w][j])) {
+            throw new IllegalArgumentException("Infinite cost");
+          }
+          if (Double.isNaN(costMatrix[w][j])) {
+            throw new IllegalArgumentException("NaN cost");
+          }
         }
         this.costMatrix[w] = Arrays.copyOf(costMatrix[w], this.dim);
       } else {

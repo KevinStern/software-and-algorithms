@@ -87,15 +87,21 @@ public class HungarianAlgorithmTest {
       new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
           new double[] { 3 } });
       Assert.fail();
-    } catch (IllegalArgumentException e) {
-
-    }
+    } catch (IllegalArgumentException e) {}
+    try {
+      new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
+          new double[] { 3, Double.POSITIVE_INFINITY } });
+      Assert.fail();
+    } catch (IllegalArgumentException e) {}
+    try {
+      new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
+          new double[] { 3, 1.0 / 0.0 } });
+      Assert.fail();
+    } catch (IllegalArgumentException e) {}
     try {
       new HungarianAlgorithm(null);
       Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
+    } catch (NullPointerException e) {}
   }
 
   @Test
