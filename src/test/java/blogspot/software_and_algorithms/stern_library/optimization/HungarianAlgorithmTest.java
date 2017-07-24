@@ -95,6 +95,11 @@ public class HungarianAlgorithmTest {
     } catch (IllegalArgumentException e) {}
     try {
       new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
+          new double[] { 3, Double.NaN } });
+      Assert.fail();
+    } catch (IllegalArgumentException e) {}
+    try {
+      new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
           new double[] { 3, 1.0 / 0.0 } });
       Assert.fail();
     } catch (IllegalArgumentException e) {}
