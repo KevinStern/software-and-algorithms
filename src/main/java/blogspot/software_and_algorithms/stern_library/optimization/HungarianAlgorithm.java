@@ -102,24 +102,6 @@ public class HungarianAlgorithm {
   }
 
   /**
-   * Compute an initial feasible solution by assigning zero labels to the
-   * workers and by assigning to each job a label equal to the minimum cost
-   * among its incident edges.
-   */
-  protected void computeInitialFeasibleSolution() {
-    for (int j = 0; j < dim; j++) {
-      labelByJob[j] = Double.POSITIVE_INFINITY;
-    }
-    for (int w = 0; w < dim; w++) {
-      for (int j = 0; j < dim; j++) {
-        if (costMatrix[w][j] < labelByJob[j]) {
-          labelByJob[j] = costMatrix[w][j];
-        }
-      }
-    }
-  }
-
-  /**
    * Execute the algorithm.
    * 
    * @return the minimum cost matching of workers to jobs based upon the
@@ -129,11 +111,10 @@ public class HungarianAlgorithm {
   public int[] execute() {
     /*
      * Heuristics to improve performance: Reduce rows and columns by their
-     * smallest element, compute an initial non-zero dual feasible solution and
-     * create a greedy matching from workers to jobs of the cost matrix.
+     * smallest element and create a greedy matching from workers to jobs of
+     * the cost matrix.
      */
     reduce();
-    computeInitialFeasibleSolution();
     greedyMatch();
 
     int w = fetchUnmatchedWorker();
@@ -244,9 +225,10 @@ public class HungarianAlgorithm {
   protected void greedyMatch() {
     for (int w = 0; w < dim; w++) {
       for (int j = 0; j < dim; j++) {
-        if (matchJobByWorker[w] == -1 && matchWorkerByJob[j] == -1
-            && costMatrix[w][j] - labelByWorker[w] - labelByJob[j] == 0) {
-          match(w, j);
+        if (matchJobByWorker[w] == -1 &&
+            matchWorkerByJob[j] == -1 &&
+            costMatrix[w][j] == 0) {
+          match(w,j);
         }
       }
     }
