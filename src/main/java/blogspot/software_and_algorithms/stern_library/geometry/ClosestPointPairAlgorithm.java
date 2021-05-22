@@ -126,7 +126,7 @@ public class ClosestPointPairAlgorithm {
       return new PairStructure(p1, p2, p1.distanceSq(p2));
     }
 
-    int mid = (low >> 1) + (high >> 1) /* low / 2 + high / 2 */;
+    int mid = (low + high) >> 1;  // (low + high) / 2
     Set<Point2D> leftSubtreeMemberSet = new HashSet<Point2D>(mid - low);
     for (int j = low; j < mid; j++) {
       leftSubtreeMemberSet.add(pointsOrderedByXCoordinate.get(j));

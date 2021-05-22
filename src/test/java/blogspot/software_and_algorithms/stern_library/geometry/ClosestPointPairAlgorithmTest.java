@@ -93,6 +93,23 @@ public class ClosestPointPairAlgorithmTest {
   }
 
   @Test
+  public void testMidCalculation() {
+    List<Point2D> list = new ArrayList<>();
+    Point2D p1 = new Point2D.Double(0.92, 0.38);
+    Point2D p2 = new Point2D.Double(0.94, 0.50);
+    list.add(new Point2D.Double(0.34, 0.91));
+    list.add(new Point2D.Double(0.46, 0.55));
+    list.add(p1);
+    list.add(p2);
+    list.add(new Point2D.Double(0.15, 0.96));
+    list.add(new Point2D.Double(0.09, 0.72));
+    list.add(new Point2D.Double(0.76, 0.20));
+    Assert.assertTrue(Arrays.equals(
+        new Point2D[] { p1, p2 },
+        sort(new ClosestPointPairAlgorithm(list).execute())));
+  }
+
+  @Test
   public void testSplitMergeProcedure() {
     Point2D p1 = new Point2D.Double(.49, .5);
     Point2D p2 = new Point2D.Double(.51, .5);
