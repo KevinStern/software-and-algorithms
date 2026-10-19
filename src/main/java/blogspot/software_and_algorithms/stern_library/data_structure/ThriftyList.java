@@ -140,24 +140,45 @@ public class ThriftyList<T> extends AbstractList<T> implements List<T>,
   private int halveCapacityLimit, doubleCapacityLimit;
 
   /**
+   * Package-private constructor used to instantiate view subclasses without
+   * allocating internal sublists.
+   *
+   * @param initialize true to allocate default sublists, false to bypass.
+   */
+  ThriftyList(boolean initialize) {
+    if (initialize) {
+      sublists = new FixedListInternal<CircularListInternal<T>>(4);
+      sublists.addTail(new CircularListInternal<T>(2));
+      sublists.addTail(new CircularListInternal<T>(4));
+      sublists.addTail(new CircularListInternal<T>(4));
+
+      capacity = 10;
+      smallSublistSizeExp = 1;
+      largeSublistSizeExp = 2;
+      halveCapacityLimit = 4;
+      doubleCapacityLimit = 16;
+      smallSublistCount = 1;
+      size = 0;
+      headSublistIndex = tailSublistIndex = 1;
+      freeCapacityHead = 6;
+    }
+  }
+
+  /**
    * Construct an empty instance of {@link ThriftyList} with the default
    * capacity.
    */
   public ThriftyList() {
-    sublists = new FixedListInternal<CircularListInternal<T>>(4);
-    sublists.addTail(new CircularListInternal<T>(2));
-    sublists.addTail(new CircularListInternal<T>(4));
-    sublists.addTail(new CircularListInternal<T>(4));
+    this(true);
+  }
 
-    capacity = 10;
-    smallSublistSizeExp = 1;
-    largeSublistSizeExp = 2;
-    halveCapacityLimit = 4;
-    doubleCapacityLimit = 16;
-    smallSublistCount = 1;
-    size = 0;
-    headSublistIndex = tailSublistIndex = 1;
-    freeCapacityHead = 6;
+  /**
+   * Returns a reverse-ordered view of this list.
+   *
+   * @return a reverse-ordered view of this list.
+   */
+  public ThriftyList<T> reversed() {
+    return new ReverseOrderThriftyListView<T>(this);
   }
 
   /**
@@ -1027,7 +1048,7 @@ public class ThriftyList<T> extends AbstractList<T> implements List<T>,
    */
   @Override
   public T[] toArray() {
-    return toArray(null);
+    return toArray((T[]) null);
   }
 
   /**
@@ -2172,6 +2193,305 @@ public class ThriftyList<T> extends AbstractList<T> implements List<T>,
       currentIndex = index;
       currentSublistIndex = sublistIndex;
       currentSublistOffset = sublistOffset;
+    }
+  }
+
+  private static class ReverseOrderThriftyListView<T> extends ThriftyList<T> {
+    private final ThriftyList<T> base;
+
+    ReverseOrderThriftyListView(ThriftyList<T> base) {
+      super(false);
+      this.base = base;
+    }
+
+    private int reverseIndex(int index) {
+      if (index < 0 || index >= base.size()) {
+        throw new IndexOutOfBoundsException();
+      }
+      return base.size() - 1 - index;
+    }
+
+    @Override
+    public ThriftyList<T> reversed() {
+      return base;
+    }
+
+    @Override
+    public int size() {
+      return base.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return base.isEmpty();
+    }
+
+    @Override
+    public boolean contains(Object o) {
+      return base.contains(o);
+    }
+
+    @Override
+    public int indexOf(Object o) {
+      int idx = base.lastIndexOf(o);
+      return idx == -1 ? -1 : base.size() - 1 - idx;
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+      int idx = base.indexOf(o);
+      return idx == -1 ? -1 : base.size() - 1 - idx;
+    }
+
+    @Override
+    public T get(int index) {
+      return base.get(reverseIndex(index));
+    }
+
+    @Override
+    public T set(int index, T element) {
+      return base.set(reverseIndex(index), element);
+    }
+
+    @Override
+    public boolean add(T element) {
+      base.addFirst(element);
+      return true;
+    }
+
+    @Override
+    public void add(int index, T element) {
+      if (index < 0 || index > base.size()) {
+        throw new IndexOutOfBoundsException();
+      }
+      base.add(base.size() - index, element);
+    }
+
+    @Override
+    public T remove(int index) {
+      return base.remove(reverseIndex(index));
+    }
+
+    @Override
+    public boolean remove(Object o) {
+      return removeFirstOccurrence(o);
+    }
+
+    @Override
+    public void clear() {
+      base.clear();
+    }
+
+    @Override
+    public void addFirst(T e) {
+      base.addLast(e);
+    }
+
+    @Override
+    public void addLast(T e) {
+      base.addFirst(e);
+    }
+
+    @Override
+    public boolean offerFirst(T e) {
+      return base.offerLast(e);
+    }
+
+    @Override
+    public boolean offerLast(T e) {
+      return base.offerFirst(e);
+    }
+
+    @Override
+    public boolean offer(T e) {
+      return base.offerFirst(e);
+    }
+
+    @Override
+    public T removeFirst() {
+      return base.removeLast();
+    }
+
+    @Override
+    public T removeLast() {
+      return base.removeFirst();
+    }
+
+    @Override
+    public T pollFirst() {
+      return base.pollLast();
+    }
+
+    @Override
+    public T pollLast() {
+      return base.pollFirst();
+    }
+
+    @Override
+    public T getFirst() {
+      return base.getLast();
+    }
+
+    @Override
+    public T getLast() {
+      return base.getFirst();
+    }
+
+    @Override
+    public T peekFirst() {
+      return base.peekLast();
+    }
+
+    @Override
+    public T peekLast() {
+      return base.peekFirst();
+    }
+
+    @Override
+    public T peek() {
+      return base.peekLast();
+    }
+
+    @Override
+    public T element() {
+      return base.getLast();
+    }
+
+    @Override
+    public T poll() {
+      return base.pollLast();
+    }
+
+    @Override
+    public T remove() {
+      return base.removeLast();
+    }
+
+    @Override
+    public void push(T e) {
+      base.addLast(e);
+    }
+
+    @Override
+    public T pop() {
+      return base.removeLast();
+    }
+
+    @Override
+    public boolean removeFirstOccurrence(Object o) {
+      return base.removeLastOccurrence(o);
+    }
+
+    @Override
+    public boolean removeLastOccurrence(Object o) {
+      return base.removeFirstOccurrence(o);
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+      return base.descendingIterator();
+    }
+
+    @Override
+    public Iterator<T> descendingIterator() {
+      return base.iterator();
+    }
+
+    @Override
+    public ListIterator<T> listIterator() {
+      return listIterator(0);
+    }
+
+    @Override
+    public ListIterator<T> listIterator(final int index) {
+      if (index < 0 || index > base.size()) {
+        throw new IndexOutOfBoundsException();
+      }
+      return new ListIterator<T>() {
+        private final ListIterator<T> i = base.listIterator(base.size() - index);
+
+        @Override
+        public boolean hasNext() {
+          return i.hasPrevious();
+        }
+
+        @Override
+        public T next() {
+          return i.previous();
+        }
+
+        @Override
+        public boolean hasPrevious() {
+          return i.hasNext();
+        }
+
+        @Override
+        public T previous() {
+          return i.next();
+        }
+
+        @Override
+        public int nextIndex() {
+          return base.size() - i.nextIndex();
+        }
+
+        @Override
+        public int previousIndex() {
+          return nextIndex() - 1;
+        }
+
+        @Override
+        public void remove() {
+          i.remove();
+        }
+
+        @Override
+        public void set(T e) {
+          i.set(e);
+        }
+
+        @Override
+        public void add(T e) {
+          i.add(e);
+          i.previous();
+        }
+      };
+    }
+
+    @Override
+    public T[] toArray() {
+      return toArray((T[]) null);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <U> U[] toArray(U[] target) {
+      if (target == null || target.length < size()) {
+        target = (U[]) new Object[size()];
+      }
+      int index = 0;
+      for (T item : this) {
+        target[index++] = (U) item;
+      }
+      return target;
+    }
+
+    @Override
+    public String toString() {
+      Iterator<T> it = iterator();
+      if (!it.hasNext()) {
+        return "[]";
+      }
+      StringBuilder sb = new StringBuilder();
+      sb.append('[');
+      for (;;) {
+        T e = it.next();
+        sb.append(e == this ? "(this Collection)" : e);
+        if (!it.hasNext()) {
+          return sb.append(']').toString();
+        }
+        sb.append(", ");
+      }
     }
   }
 }

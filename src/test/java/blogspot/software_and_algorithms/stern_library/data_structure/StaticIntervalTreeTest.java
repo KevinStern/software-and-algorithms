@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /* Copyright (c) 2012 Kevin L. Stern
  * 
@@ -52,7 +52,7 @@ public class StaticIntervalTreeTest {
                                                      StaticIntervalTree<Double, Interval<Double>> tree) {
     Set<Interval<Double>> result = new HashSet<Interval<Double>>();
     for (Double queryPoint : queryPoints) {
-      Assert.assertEquals(fetchContainingIntervals(master, queryPoint),
+      Assertions.assertEquals(fetchContainingIntervals(master, queryPoint),
                           tree.fetchContainingIntervals(result, queryPoint));
       result.clear();
     }
@@ -63,7 +63,7 @@ public class StaticIntervalTreeTest {
                                                       StaticIntervalTree<Double, Interval<Double>> tree) {
     Set<Interval<Double>> result = new HashSet<Interval<Double>>();
     for (Interval<Double> next : queryIntervals) {
-      Assert.assertEquals(fetchOverlappingIntervals(master, next),
+      Assertions.assertEquals(fetchOverlappingIntervals(master, next),
                           tree.fetchOverlappingIntervals(result, next));
       result.clear();
     }
@@ -101,7 +101,7 @@ public class StaticIntervalTreeTest {
     return result;
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void globalSetup() {
     masterClosed = new ArrayList<Interval<Double>>();
     masterHalfOpenLow = new ArrayList<Interval<Double>>();
@@ -124,14 +124,14 @@ public class StaticIntervalTreeTest {
       masterHalfOpenLow.add(next);
       masterHalfOpenLow
           .add(new Interval<Double>(next.getLow() + halfIntervalWidth, false,
-              next.getHigh() + halfIntervalWidth, true));
+               next.getHigh() + halfIntervalWidth, true));
 
       next = new Interval<Double>(intervalWidth * j, true, intervalWidth
           * (j + 1), false);
       masterHalfOpenHigh.add(next);
       masterHalfOpenHigh
           .add(new Interval<Double>(next.getLow() + halfIntervalWidth, true,
-              next.getHigh() + halfIntervalWidth, false));
+               next.getHigh() + halfIntervalWidth, false));
 
       next = new Interval<Double>(intervalWidth * j, false, intervalWidth
           * (j + 1), false);
@@ -145,7 +145,7 @@ public class StaticIntervalTreeTest {
     masterOpenTree = makeTree(masterOpen);
   }
 
-  @AfterClass
+  @AfterAll
   public static void globalTeardown() {
     masterClosed = null;
     masterHalfOpenLow = null;
@@ -172,19 +172,19 @@ public class StaticIntervalTreeTest {
   @Test
   public void testClear() {
     StaticIntervalTree<Double, Interval<Double>> tree = makeTree(masterClosed);
-    Assert.assertEquals(masterClosed.size(), tree.getSize());
+    Assertions.assertEquals(masterClosed.size(), tree.getSize());
     tree.clear();
-    Assert.assertTrue(tree
+    Assertions.assertTrue(tree
         .fetchContainingIntervals(new ArrayList<Interval<Double>>(),
                                   masterClosed.get(0).getLow()).isEmpty());
-    Assert.assertEquals(0, tree.getSize());
+    Assertions.assertEquals(0, tree.getSize());
     /*
      * Test that the tree structure remains intact.
      */
     for (Interval<Double> next : masterClosed) {
       tree.insert(next);
     }
-    Assert.assertFalse(tree
+    Assertions.assertFalse(tree
         .fetchContainingIntervals(new ArrayList<Interval<Double>>(),
                                   masterClosed.get(0).getLow()).isEmpty());
   }
@@ -199,8 +199,8 @@ public class StaticIntervalTreeTest {
     StaticIntervalTree<Double, Interval<Double>> tree = makeTree(master);
     List<Interval<Double>> result = tree
         .fetchContainingIntervals(new ArrayList<Interval<Double>>(), 0.25);
-    Assert.assertEquals(1, result.size());
-    Assert.assertEquals(master.get(1), result.get(0));
+    Assertions.assertEquals(1, result.size());
+    Assertions.assertEquals(master.get(1), result.get(0));
   }
 
   @Test
@@ -221,55 +221,34 @@ public class StaticIntervalTreeTest {
   @Test
   public void testNull() {
     StaticIntervalTree<Double, Interval<Double>> tree = new StaticIntervalTree<Double, Interval<Double>>();
-    try {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.buildTree(null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.fetchContainingIntervals(new ArrayList<Interval<Double>>(),
                                     (Double) null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.fetchContainingIntervals((Collection<Interval<Double>>) null, 0.0);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.fetchOverlappingIntervals(new ArrayList<Interval<Double>>(),
                                      (Interval<Double>) null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.fetchOverlappingIntervals((Collection<Interval<Double>>) null,
                                      new Interval<Double>(0.0, true, 1.0, true));
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    Assert.assertFalse(tree.delete(null));
+    });
+    Assertions.assertFalse(tree.delete(null));
     Set<Interval<Double>> list = new HashSet<Interval<Double>>(masterClosed);
     list.add(null);
-    try {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.buildTree(list);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
+    });
     tree.buildTree(new HashSet<Interval<Double>>(masterClosed));
-    try {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.insert(null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
+    });
   }
 
   @Test

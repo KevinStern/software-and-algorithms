@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /* Copyright (c) 2012 Kevin L. Stern
  * 
@@ -42,7 +42,7 @@ public class HungarianAlgorithmTest {
         continue;
       }
       if (!visited.add(match[i])) {
-        Assert.fail();
+        Assertions.fail();
       }
       result += matrix[i][match[i]];
     }
@@ -55,8 +55,8 @@ public class HungarianAlgorithmTest {
         new double[] { 4.0, 4.5, 6.0 }, new double[] { 3.0, 2.25, 3.0 } };
     HungarianAlgorithm b = new HungarianAlgorithm(matrix);
     int[] match = b.execute();
-    Assert.assertTrue(Arrays.equals(new int[] { 1, 0, 2 }, match));
-    Assert.assertEquals(8.5, computeCost(matrix, match), 0.0000001);
+    Assertions.assertTrue(Arrays.equals(new int[] { 1, 0, 2 }, match));
+    Assertions.assertEquals(8.5, computeCost(matrix, match), 0.0000001);
   }
 
   @Test
@@ -65,8 +65,8 @@ public class HungarianAlgorithmTest {
         new double[] { 0.9, 0.8, 0.1 }, new double[] { 0.9, 0.7, 0.4 } };
     HungarianAlgorithm b = new HungarianAlgorithm(matrix);
     int[] match = b.execute();
-    Assert.assertTrue(Arrays.equals(new int[] { 0, 2, 1 }, match));
-    Assert.assertEquals(1.8, computeCost(matrix, match), 0.0000001);
+    Assertions.assertTrue(Arrays.equals(new int[] { 0, 2, 1 }, match));
+    Assertions.assertEquals(1.8, computeCost(matrix, match), 0.0000001);
   }
 
   @Test
@@ -77,31 +77,27 @@ public class HungarianAlgorithmTest {
         new double[] { 9.0, 4.0, 7.0, 1.0 } };
     HungarianAlgorithm b = new HungarianAlgorithm(matrix);
     int[] match = b.execute();
-    Assert.assertTrue(Arrays.equals(new int[] { 1, 0, 2, 3 }, match));
-    Assert.assertEquals(5, computeCost(matrix, match), 0.0000001);
+    Assertions.assertTrue(Arrays.equals(new int[] { 1, 0, 2, 3 }, match));
+    Assertions.assertEquals(5, computeCost(matrix, match), 0.0000001);
   }
 
   @Test
   public void testInvalidInput() {
-    try {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
           new double[] { 3 } });
-      Assert.fail();
-    } catch (IllegalArgumentException e) {}
-    try {
+    });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
           new double[] { 3, Double.POSITIVE_INFINITY } });
-      Assert.fail();
-    } catch (IllegalArgumentException e) {}
-    try {
+    });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
       new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
           new double[] { 3, 1.0 / 0.0 } });
-      Assert.fail();
-    } catch (IllegalArgumentException e) {}
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       new HungarianAlgorithm(null);
-      Assert.fail();
-    } catch (NullPointerException e) {}
+    });
   }
 
   @Test
@@ -113,8 +109,8 @@ public class HungarianAlgorithmTest {
         new double[] { 9.0, 4.0, 7.0, 1.0, 0.0 } };
     HungarianAlgorithm b = new HungarianAlgorithm(matrix);
     int[] match = b.execute();
-    Assert.assertTrue(Arrays.equals(new int[] { 1, 0, 3, 4 }, match));
-    Assert.assertEquals(3, computeCost(matrix, match), 0.0000001);
+    Assertions.assertTrue(Arrays.equals(new int[] { 1, 0, 3, 4 }, match));
+    Assertions.assertEquals(3, computeCost(matrix, match), 0.0000001);
   }
 
   @Test
@@ -126,7 +122,7 @@ public class HungarianAlgorithmTest {
         new double[] { 0.0, 0.0, 0.0, 0.0 } };
     HungarianAlgorithm b = new HungarianAlgorithm(matrix);
     int[] match = b.execute();
-    Assert.assertTrue(Arrays.equals(new int[] { 1, -1, 2, 3, 0 }, match));
-    Assert.assertEquals(3, computeCost(matrix, match), 0.0000001);
+    Assertions.assertTrue(Arrays.equals(new int[] { 1, -1, 2, 3, 0 }, match));
+    Assertions.assertEquals(3, computeCost(matrix, match), 0.0000001);
   }
 }

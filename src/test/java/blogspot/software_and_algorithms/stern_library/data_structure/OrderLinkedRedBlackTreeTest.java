@@ -3,8 +3,8 @@ package blogspot.software_and_algorithms.stern_library.data_structure;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /* Copyright (C) 2012 Kevin L. Stern.
  * 
@@ -36,50 +36,32 @@ public class OrderLinkedRedBlackTreeTest {
   @Test
   public void testNull() {
     OrderLinkedRedBlackTree<Integer> tree = new OrderLinkedRedBlackTree<Integer>();
-    try {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.insert(null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.getPredecessor(null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.getSuccessor(null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    Assert.assertNull(tree.delete(null));
-    Assert.assertNull(tree.getNode(null));
-    Assert.assertFalse(tree.contains(null));
+    });
+    Assertions.assertNull(tree.delete(null));
+    Assertions.assertNull(tree.getNode(null));
+    Assertions.assertFalse(tree.contains(null));
 
     tree.insert(0);
-    try {
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.insert(null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.getPredecessor(null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    try {
+    });
+    Assertions.assertThrows(NullPointerException.class, () -> {
       tree.getSuccessor(null);
-      Assert.fail();
-    } catch (NullPointerException e) {
-
-    }
-    Assert.assertNull(tree.delete(null));
-    Assert.assertNull(tree.getNode(null));
-    Assert.assertFalse(tree.contains(null));
+    });
+    Assertions.assertNull(tree.delete(null));
+    Assertions.assertNull(tree.getNode(null));
+    Assertions.assertFalse(tree.contains(null));
   }
 
   @Test
@@ -92,11 +74,11 @@ public class OrderLinkedRedBlackTreeTest {
     }
     while (!master.isEmpty()) {
       for (int j = 1; j < master.size(); j++) {
-        Assert.assertEquals(master.get(j - 1),
+        Assertions.assertEquals(master.get(j - 1),
                             tree.getPredecessor(tree.getNode(master.get(j)))
                                 .getValue());
       }
-      Assert.assertNull(tree.getPredecessor(tree.getNode(master.get(0))));
+      Assertions.assertNull(tree.getPredecessor(tree.getNode(master.get(0))));
       int index = master.size() >> 1;
       tree.delete(master.get(index));
       master.remove(index);
@@ -113,11 +95,11 @@ public class OrderLinkedRedBlackTreeTest {
     }
     while (!master.isEmpty()) {
       for (int j = 0; j < master.size() - 1; j++) {
-        Assert.assertEquals(master.get(j + 1),
+        Assertions.assertEquals(master.get(j + 1),
                             tree.getSuccessor(tree.getNode(master.get(j)))
                                 .getValue());
       }
-      Assert
+      Assertions
           .assertNull(tree.getSuccessor(tree.getNode(master.get(master.size() - 1))));
       int index = master.size() >> 1;
       tree.delete(master.get(index));

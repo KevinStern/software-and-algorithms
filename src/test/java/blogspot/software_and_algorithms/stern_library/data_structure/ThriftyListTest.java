@@ -12,9 +12,8 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import junit.framework.Assert;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /* Copyright (C) 2012 Kevin L. Stern.
  * 
@@ -54,9 +53,9 @@ public class ThriftyListTest {
     list.addAll(5, Collections.<Integer> emptyList());
     list.addAll(Collections.<Integer> emptyList());
 
-    Assert.assertEquals(15, list.size());
+    Assertions.assertEquals(15, list.size());
     for (int j = 0; j < 15; j++) {
-      Assert.assertEquals(Integer.valueOf(j), list.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.get(j));
     }
   }
 
@@ -70,10 +69,10 @@ public class ThriftyListTest {
     }
 
     for (int j = testCount - 1; j >= 0; j--) {
-      Assert.assertEquals(Integer.valueOf(j), list.removeFirst());
+      Assertions.assertEquals(Integer.valueOf(j), list.removeFirst());
     }
 
-    Assert.assertEquals(0, list.size());
+    Assertions.assertEquals(0, list.size());
   }
 
   @Test
@@ -85,10 +84,10 @@ public class ThriftyListTest {
     }
 
     for (int j = testCount - 1; j >= 0; j--) {
-      Assert.assertEquals(Integer.valueOf(j), list.removeLast());
+      Assertions.assertEquals(Integer.valueOf(j), list.removeLast());
     }
 
-    Assert.assertEquals(0, list.size());
+    Assertions.assertEquals(0, list.size());
   }
 
   @Test
@@ -100,9 +99,9 @@ public class ThriftyListTest {
     }
     ThriftyList<Integer> cloneList = (ThriftyList<Integer>) list.clone();
 
-    Assert.assertEquals(testCount, cloneList.size());
+    Assertions.assertEquals(testCount, cloneList.size());
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(Integer.valueOf(j), cloneList.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), cloneList.get(j));
     }
   }
 
@@ -114,69 +113,57 @@ public class ThriftyListTest {
       list.add(j);
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertTrue(list.contains(j));
+      Assertions.assertTrue(list.contains(j));
     }
-    Assert.assertFalse(list
+    Assertions.assertFalse(list
         .contains("This String is certainly not in the list"));
 
     Integer[] allValues = new Integer[testCount];
     for (int j = 0; j < testCount; j++) {
       allValues[j] = j;
     }
-    Assert.assertTrue(list.containsAll(Arrays.asList(allValues)));
+    Assertions.assertTrue(list.containsAll(Arrays.asList(allValues)));
     allValues[0] = -1;
-    Assert.assertFalse(list.containsAll(Arrays.asList(allValues)));
+    Assertions.assertFalse(list.containsAll(Arrays.asList(allValues)));
   }
 
   @Test
   public void testDescendingIterator() {
     ThriftyList<Integer> list = new ThriftyList<Integer>();
-    Iterator<Integer> ri = list.descendingIterator();
-    Assert.assertFalse(ri.hasNext());
-    try {
-      ri.next();
-      Assert.fail();
-    } catch (NoSuchElementException e) {
-
-    }
-    try {
-      ri.remove();
-      Assert.fail();
-    } catch (IllegalStateException e) {
-
-    }
+    Iterator<Integer> emptyRi = list.descendingIterator();
+    Assertions.assertFalse(emptyRi.hasNext());
+    Assertions.assertThrows(NoSuchElementException.class, () -> {
+      emptyRi.next();
+    });
+    Assertions.assertThrows(IllegalStateException.class, () -> {
+      emptyRi.remove();
+    });
 
     int testCount = 100;
     for (int j = 0; j < testCount; j++) {
       list.add(j);
     }
 
-    ri = list.descendingIterator();
+    Iterator<Integer> ri1 = list.descendingIterator();
     for (int j = testCount - 1; j >= 0; j--) {
-      Assert.assertTrue(ri.hasNext());
-      Assert.assertEquals(Integer.valueOf(j), ri.next());
+      Assertions.assertTrue(ri1.hasNext());
+      Assertions.assertEquals(Integer.valueOf(j), ri1.next());
     }
 
-    ri = list.descendingIterator();
-    try {
-      ri.remove();
-      Assert.fail();
-    } catch (IllegalStateException e) {
-
-    }
+    Iterator<Integer> ri2 = list.descendingIterator();
+    Assertions.assertThrows(IllegalStateException.class, () -> {
+      ri2.remove();
+    });
     for (int j = testCount - 1; j >= 0; j--) {
-      Assert.assertTrue(ri.hasNext());
-      Assert.assertEquals(Integer.valueOf(j), ri.next());
-      ri.remove();
+      Assertions.assertTrue(ri2.hasNext());
+      Assertions.assertEquals(Integer.valueOf(j), ri2.next());
+      ri2.remove();
     }
-    Assert.assertFalse(ri.hasNext());
-    Assert.assertEquals(0, list.size());
-    try {
-      ri.next();
-      Assert.fail();
-    } catch (NoSuchElementException e) {
-
-    }
+    Assertions.assertFalse(ri2.hasNext());
+    Assertions.assertEquals(0, list.size());
+    Assertions.assertThrows(NoSuchElementException.class, () -> {
+      ri2.next();
+    });
   }
 
   @Test
@@ -187,10 +174,10 @@ public class ThriftyListTest {
       list.add(j);
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(Integer.valueOf(j), list.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.get(j));
     }
-    Assert.assertEquals(Integer.valueOf(0), list.getFirst());
-    Assert.assertEquals(Integer.valueOf(list.get(list.size() - 1)),
+    Assertions.assertEquals(Integer.valueOf(0), list.getFirst());
+    Assertions.assertEquals(Integer.valueOf(list.get(list.size() - 1)),
                         list.getLast());
   }
 
@@ -202,18 +189,18 @@ public class ThriftyListTest {
       list.add(j);
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(j, list.indexOf(list.get(j)));
-      Assert.assertEquals(j, list.lastIndexOf(list.get(j)));
+      Assertions.assertEquals(j, list.indexOf(list.get(j)));
+      Assertions.assertEquals(j, list.lastIndexOf(list.get(j)));
     }
 
-    Assert.assertEquals(-1, list
+    Assertions.assertEquals(-1, list
         .indexOf("This String is certainly not in the list"));
-    Assert.assertEquals(-1, list
+    Assertions.assertEquals(-1, list
         .lastIndexOf("This String is certainly not in the list"));
 
     list.add(0);
-    Assert.assertEquals(0, list.indexOf(0));
-    Assert.assertEquals(list.size() - 1, list.lastIndexOf(0));
+    Assertions.assertEquals(0, list.indexOf(0));
+    Assertions.assertEquals(list.size() - 1, list.lastIndexOf(0));
   }
 
   @Test
@@ -224,7 +211,7 @@ public class ThriftyListTest {
       list.add(j, j);
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(Integer.valueOf(j), list.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.get(j));
     }
   }
 
@@ -236,7 +223,7 @@ public class ThriftyListTest {
       list.add(0, j);
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(Integer.valueOf(j), list.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.get(j));
     }
   }
 
@@ -251,7 +238,7 @@ public class ThriftyListTest {
       list.add(j, j);
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(Integer.valueOf(j), list.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.get(j));
     }
   }
 
@@ -259,41 +246,35 @@ public class ThriftyListTest {
   public void testIterator() {
     ThriftyList<Integer> list = new ThriftyList<Integer>();
 
-    ListIterator<Integer> i = list.listIterator();
-    try {
-      i.next();
-      Assert.fail();
-    } catch (NoSuchElementException e) {
-
-    }
-    try {
-      i.remove();
-      Assert.fail();
-    } catch (IllegalStateException e) {
-
-    }
+    ListIterator<Integer> emptyIter = list.listIterator();
+    Assertions.assertThrows(NoSuchElementException.class, () -> {
+      emptyIter.next();
+    });
+    Assertions.assertThrows(IllegalStateException.class, () -> {
+      emptyIter.remove();
+    });
 
     int testCount = 100;
-    i = list.listIterator();
+    ListIterator<Integer> i = list.listIterator();
     for (int j = 0; j < testCount; j++) {
       i.add(j);
     }
 
     for (int j = testCount - 1; j >= 0; j--) {
-      Assert.assertEquals(j, i.previousIndex());
-      Assert.assertEquals(Integer.valueOf(j), i.previous());
+      Assertions.assertEquals(j, i.previousIndex());
+      Assertions.assertEquals(Integer.valueOf(j), i.previous());
     }
 
     for (int j = 0; j < testCount; j++) {
-      Assert.assertTrue(i.hasNext());
+      Assertions.assertTrue(i.hasNext());
       Integer o = list.get(j);
-      Assert.assertEquals(j, i.nextIndex());
-      Assert.assertEquals(o, i.next());
+      Assertions.assertEquals(j, i.nextIndex());
+      Assertions.assertEquals(o, i.next());
       i.remove();
-      Assert.assertEquals(testCount - 1, list.size());
+      Assertions.assertEquals(testCount - 1, list.size());
       i.add(o);
-      Assert.assertEquals(testCount, list.size());
-      Assert.assertEquals(o, i.previous());
+      Assertions.assertEquals(testCount, list.size());
+      Assertions.assertEquals(o, i.previous());
       i.next();
     }
 
@@ -304,55 +285,55 @@ public class ThriftyListTest {
     i.set(arbitraryValue);
     for (int j = 0; j < testCount; j++) {
       if (j == arbitraryIndex) {
-        Assert.assertEquals(arbitraryValue, list.get(j));
+        Assertions.assertEquals(arbitraryValue, list.get(j));
         continue;
       }
-      Assert.assertEquals(Integer.valueOf(j), list.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.get(j));
     }
 
     i = list.listIterator(list.size());
     for (int j = list.size() - 1; i.hasPrevious(); j--) {
       Integer o = list.get(j);
-      Assert.assertEquals(j, i.previousIndex());
-      Assert.assertEquals(o, i.previous());
+      Assertions.assertEquals(j, i.previousIndex());
+      Assertions.assertEquals(o, i.previous());
       i.remove();
-      Assert.assertEquals(testCount - 1, list.size());
+      Assertions.assertEquals(testCount - 1, list.size());
       i.add(o);
-      Assert.assertEquals(testCount, list.size());
-      Assert.assertEquals(o, i.previous());
+      Assertions.assertEquals(testCount, list.size());
+      Assertions.assertEquals(o, i.previous());
     }
   }
 
   @Test
   public void testPeek() {
     ThriftyList<Integer> list = new ThriftyList<Integer>();
-    Assert.assertNull(list.peek());
-    Assert.assertNull(list.peekFirst());
-    Assert.assertNull(list.peekLast());
+    Assertions.assertNull(list.peek());
+    Assertions.assertNull(list.peekFirst());
+    Assertions.assertNull(list.peekLast());
     int testCount = 10;
     for (int j = 0; j < testCount; j++) {
       list.add(j);
     }
-    Assert.assertEquals(list.getFirst(), list.peek());
-    Assert.assertEquals(list.getFirst(), list.peekFirst());
-    Assert.assertEquals(list.getLast(), list.peekLast());
-    Assert.assertEquals(testCount, list.size());
+    Assertions.assertEquals(list.getFirst(), list.peek());
+    Assertions.assertEquals(list.getFirst(), list.peekFirst());
+    Assertions.assertEquals(list.getLast(), list.peekLast());
+    Assertions.assertEquals(testCount, list.size());
   }
 
   @Test
   public void testPoll() {
     ThriftyList<Integer> list = new ThriftyList<Integer>();
-    Assert.assertNull(list.poll());
-    Assert.assertNull(list.pollFirst());
-    Assert.assertNull(list.pollLast());
+    Assertions.assertNull(list.poll());
+    Assertions.assertNull(list.pollFirst());
+    Assertions.assertNull(list.pollLast());
     int testCount = 10;
     for (int j = 0; j < testCount; j++) {
       list.add(j);
     }
-    Assert.assertEquals(list.getFirst(), list.poll());
-    Assert.assertEquals(list.getFirst(), list.pollFirst());
-    Assert.assertEquals(list.getLast(), list.pollLast());
-    Assert.assertEquals(testCount - 3, list.size());
+    Assertions.assertEquals(list.getFirst(), list.poll());
+    Assertions.assertEquals(list.getFirst(), list.pollFirst());
+    Assertions.assertEquals(list.getLast(), list.pollLast());
+    Assertions.assertEquals(testCount - 3, list.size());
   }
 
   @Test
@@ -363,7 +344,7 @@ public class ThriftyListTest {
       list.add(j);
     }
     for (int j = testCount - 1; j >= 0; j--) {
-      Assert.assertEquals(Integer.valueOf(j), list.remove(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.remove(j));
     }
   }
 
@@ -376,12 +357,12 @@ public class ThriftyListTest {
     }
     list.add(0);
     list.removeFirstOccurrence(0);
-    Assert.assertNotSame(Integer.valueOf(0), list.get(0));
-    Assert.assertEquals(Integer.valueOf(0), list.peekLast());
+    Assertions.assertNotSame(Integer.valueOf(0), list.get(0));
+    Assertions.assertEquals(Integer.valueOf(0), list.peekLast());
     list.add(0, 0);
     list.removeLastOccurrence(0);
-    Assert.assertNotSame(Integer.valueOf(0), list.peekLast());
-    Assert.assertEquals(Integer.valueOf(0), list.peekFirst());
+    Assertions.assertNotSame(Integer.valueOf(0), list.peekLast());
+    Assertions.assertEquals(Integer.valueOf(0), list.peekFirst());
   }
 
   @Test
@@ -392,7 +373,7 @@ public class ThriftyListTest {
       list.add(j);
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(Integer.valueOf(j), list.remove(0));
+      Assertions.assertEquals(Integer.valueOf(j), list.remove(0));
     }
   }
 
@@ -421,10 +402,10 @@ public class ThriftyListTest {
     } catch (Exception e) {
       StringWriter writer = new StringWriter();
       e.printStackTrace(new PrintWriter(writer));
-      Assert.fail(writer.toString());
+      Assertions.fail(writer.toString());
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(Integer.valueOf(j), list.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.get(j));
     }
 
     list = new ThriftyList<Integer>();
@@ -446,9 +427,9 @@ public class ThriftyListTest {
     } catch (Exception e) {
       StringWriter writer = new StringWriter();
       e.printStackTrace(new PrintWriter(writer));
-      Assert.fail(writer.toString());
+      Assertions.fail(writer.toString());
     }
-    Assert.assertTrue(list.isEmpty());
+    Assertions.assertTrue(list.isEmpty());
   }
 
   @Test
@@ -463,7 +444,7 @@ public class ThriftyListTest {
       list.set(j, Integer.valueOf(j));
     }
     for (int j = 0; j < testCount; j++) {
-      Assert.assertEquals(Integer.valueOf(j), list.get(j));
+      Assertions.assertEquals(Integer.valueOf(j), list.get(j));
     }
   }
 
@@ -474,8 +455,40 @@ public class ThriftyListTest {
     for (int j = 0; j < testCount; j++) {
       list.add(j);
     }
-    Assert.assertEquals(testCount, list.size());
+    Assertions.assertEquals(testCount, list.size());
     list.clear();
-    Assert.assertTrue(list.isEmpty());
+    Assertions.assertTrue(list.isEmpty());
+  }
+
+  @Test
+  public void testReversed() {
+    ThriftyList<Integer> list = new ThriftyList<Integer>();
+    ThriftyList<Integer> r = list.reversed();
+    Assertions.assertTrue(r.isEmpty());
+    Assertions.assertSame(list, r.reversed());
+
+    for (int j = 0; j < 5; j++) {
+      list.add(j);
+    }
+    Assertions.assertEquals(5, r.size());
+    Assertions.assertEquals(Integer.valueOf(4), r.getFirst());
+    Assertions.assertEquals(Integer.valueOf(0), r.getLast());
+    Assertions.assertEquals(Integer.valueOf(4), r.get(0));
+    Assertions.assertEquals(Integer.valueOf(0), r.get(4));
+
+    r.addFirst(10);
+    Assertions.assertEquals(Integer.valueOf(10), list.getLast());
+    Assertions.assertEquals(Integer.valueOf(10), r.removeFirst());
+    Assertions.assertEquals(Integer.valueOf(4), list.getLast());
+
+    r.set(0, 40);
+    Assertions.assertEquals(Integer.valueOf(40), list.get(4));
+
+    Iterator<Integer> iter = r.iterator();
+    Assertions.assertEquals(Integer.valueOf(40), iter.next());
+    Assertions.assertEquals(Integer.valueOf(3), iter.next());
+
+    r.clear();
+    Assertions.assertTrue(list.isEmpty());
   }
 }

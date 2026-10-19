@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /* Copyright (c) 2012 Kevin L. Stern
  * 
@@ -54,7 +54,7 @@ public class ClosestPointPairAlgorithmTest {
     List<Point2D> list = new ArrayList<Point2D>();
     list.add(p1);
     list.add(p2);
-    Assert.assertTrue(Arrays.equals(
+    Assertions.assertTrue(Arrays.equals(
         new Point2D[] { p1, p2 },
         sort(new ClosestPointPairAlgorithm(list).execute())));
 
@@ -70,7 +70,7 @@ public class ClosestPointPairAlgorithmTest {
     list.add(p1);
     list.add(p2);
     list.add(p3);
-    Assert.assertTrue(Arrays.equals(
+    Assertions.assertTrue(Arrays.equals(
         new Point2D[] { p1, p3 },
         sort(new ClosestPointPairAlgorithm(list).execute())));
 
@@ -87,7 +87,7 @@ public class ClosestPointPairAlgorithmTest {
     list.add(new Point2D.Double(.6, .5));
     list.add(new Point2D.Double(.7, .5));
     list.add(new Point2D.Double(.8, .5));
-    Assert.assertTrue(Arrays.equals(
+    Assertions.assertTrue(Arrays.equals(
         new Point2D[] { p1, p2 },
         sort(new ClosestPointPairAlgorithm(list).execute())));
   }
@@ -104,7 +104,7 @@ public class ClosestPointPairAlgorithmTest {
     list.add(new Point2D.Double(0.15, 0.96));
     list.add(new Point2D.Double(0.09, 0.72));
     list.add(new Point2D.Double(0.76, 0.20));
-    Assert.assertTrue(Arrays.equals(
+    Assertions.assertTrue(Arrays.equals(
         new Point2D[] { p1, p2 },
         sort(new ClosestPointPairAlgorithm(list).execute())));
   }
@@ -120,7 +120,7 @@ public class ClosestPointPairAlgorithmTest {
     list.add(new Point2D.Double(.5, .2));
     list.add(new Point2D.Double(.4, .5));
     list.add(new Point2D.Double(.6, .5));
-    Assert.assertTrue(Arrays.equals(
+    Assertions.assertTrue(Arrays.equals(
         new Point2D[] { p1, p2 },
         sort(new ClosestPointPairAlgorithm(list).execute())));
   }
