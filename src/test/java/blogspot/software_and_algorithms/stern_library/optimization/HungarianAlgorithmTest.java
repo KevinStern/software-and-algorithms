@@ -98,6 +98,30 @@ public class HungarianAlgorithmTest {
     Assertions.assertThrows(NullPointerException.class, () -> {
       new HungarianAlgorithm(null);
     });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
+          new double[] { 3, 4 } }, -0.001);
+    });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
+          new double[] { 3, 4 } }, Double.NaN);
+    });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
+          new double[] { 3, 4 } }, Double.POSITIVE_INFINITY);
+    });
+  }
+
+  @Test
+  public void testEpsilon() {
+    double[][] matrix = new double[][] {
+        new double[] { 0.1 + 0.2, 0.5 },
+        new double[] { 0.3, 0.4 } };
+    HungarianAlgorithm b = new HungarianAlgorithm(matrix, 1e-9);
+    int[] match = b.execute();
+    Assertions.assertTrue(Arrays.equals(new int[] { 0, 1 }, match)
+        || Arrays.equals(new int[] { 1, 0 }, match));
+    Assertions.assertEquals(0.7, computeCost(matrix, match), 0.0000001);
   }
 
   @Test

@@ -56,6 +56,7 @@ public class HungarianAlgorithm {
   private final int[] matchJobByWorker, matchWorkerByJob;
   private final int[] parentWorkerByCommittedJob;
   private final boolean[] committedWorkers;
+  private final double epsilon;
 
   /**
    * Construct an instance of the algorithm.
@@ -67,6 +68,25 @@ public class HungarianAlgorithm {
    *          addition, all entries must be non-infinite numbers.
    */
   public HungarianAlgorithm(double[][] costMatrix) {
+    this(costMatrix, 0);
+  }
+
+  /**
+   * Construct an instance of the algorithm.
+   * 
+   * @param costMatrix
+   *          the cost matrix, where matrix[i][j] holds the cost of assigning
+   *          worker i to job j, for all i, j. The cost matrix must not be
+   *          irregular in the sense that all rows must be the same length; in
+   *          addition, all entries must be non-infinite numbers.
+   * @param epsilon
+   *          the tolerance to use for equality checking.
+   */
+  public HungarianAlgorithm(double[][] costMatrix, double epsilon) {
+    if (Double.isNaN(epsilon) || Double.isInfinite(epsilon) || epsilon < 0) {
+      throw new IllegalArgumentException("Invalid epsilon");
+    }
+    this.epsilon = epsilon;
     this.dim = Math.max(costMatrix.length, costMatrix[0].length);
     this.rows = costMatrix.length;
     this.cols = costMatrix[0].length;
@@ -182,7 +202,7 @@ public class HungarianAlgorithm {
           }
         }
       }
-      if (minSlackValue > 0) {
+      if (minSlackValue > epsilon) {
         updateLabeling(minSlackValue);
       }
       parentWorkerByCommittedJob[minSlackJob] = minSlackWorker;
@@ -245,7 +265,7 @@ public class HungarianAlgorithm {
     for (int w = 0; w < dim; w++) {
       for (int j = 0; j < dim; j++) {
         if (matchJobByWorker[w] == -1 && matchWorkerByJob[j] == -1
-            && costMatrix[w][j] - labelByWorker[w] - labelByJob[j] == 0) {
+            && Math.abs(costMatrix[w][j] - labelByWorker[w] - labelByJob[j]) <= epsilon) {
           match(w, j);
         }
       }
