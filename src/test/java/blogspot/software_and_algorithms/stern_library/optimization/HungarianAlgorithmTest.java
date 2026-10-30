@@ -110,18 +110,43 @@ public class HungarianAlgorithmTest {
       new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
           new double[] { 3, 4 } }, Double.POSITIVE_INFINITY);
     });
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      new HungarianAlgorithm(new double[][] { new double[] { 1, 2 },
+          new double[] { 3, 4 } }, Double.NEGATIVE_INFINITY);
+    });
   }
 
   @Test
-  public void testEpsilon() {
+  public void testEpsilonGreedyMatch() {
     double[][] matrix = new double[][] {
-        new double[] { 0.1 + 0.2, 0.5 },
-        new double[] { 0.3, 0.4 } };
-    HungarianAlgorithm b = new HungarianAlgorithm(matrix, 1e-9);
-    int[] match = b.execute();
-    Assertions.assertTrue(Arrays.equals(new int[] { 0, 1 }, match)
-        || Arrays.equals(new int[] { 1, 0 }, match));
-    Assertions.assertEquals(0.7, computeCost(matrix, match), 0.0000001);
+        new double[] { 1.0 + 1e-6, 1.0 },
+        new double[] { 1.0, 1.0 } };
+
+    int[] exactMatch = new HungarianAlgorithm(matrix).execute();
+    Assertions.assertArrayEquals(new int[] { 1, 0 }, exactMatch);
+    Assertions.assertEquals(2.0, computeCost(matrix, exactMatch), 1e-12);
+
+    int[] tolerantMatch = new HungarianAlgorithm(matrix, 1e-5).execute();
+    Assertions.assertArrayEquals(new int[] { 0, 1 }, tolerantMatch);
+    Assertions.assertEquals(2.0 + 1e-6, computeCost(matrix, tolerantMatch), 1e-12);
+  }
+
+  @Test
+  public void testEpsilonExecutePhase() {
+    double[][] matrix = new double[][] {
+        new double[] { 0.0, 1.0, 1e-6, 1.0, 1.5e-6 },
+        new double[] { 1.0, 0.0, 0.0, 0.0, 0.0 },
+        new double[] { 1.0, 1.0, 0.0, 1e-6, 1.0 },
+        new double[] { 0.0, 1.0, 1.0, 1.0, 1.0 },
+        new double[] { 1.0, 0.0, 1.0, 1.0, 1.0 } };
+
+    int[] exactMatch = new HungarianAlgorithm(matrix).execute();
+    Assertions.assertArrayEquals(new int[] { 4, 3, 2, 0, 1 }, exactMatch);
+    Assertions.assertEquals(1.5e-6, computeCost(matrix, exactMatch), 1e-12);
+
+    int[] tolerantMatch = new HungarianAlgorithm(matrix, 1e-5).execute();
+    Assertions.assertArrayEquals(new int[] { 2, 4, 3, 0, 1 }, tolerantMatch);
+    Assertions.assertEquals(2.0e-6, computeCost(matrix, tolerantMatch), 1e-12);
   }
 
   @Test
